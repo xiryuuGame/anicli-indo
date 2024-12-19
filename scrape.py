@@ -1,6 +1,7 @@
 import subprocess
 import json
 from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
 def scrape_anime_list(url):
     """
@@ -35,6 +36,35 @@ def scrape_anime_list(url):
         print(f"Error fetching URL: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+def scrape_video_link(url):
+    """
+    Scrapes the video link from a given episode URL using Playwright.
+
+    Args:
+        url (str): The URL of the episode page to scrape.
+
+    Returns:
+        str: The video link, or None if not found.
+    """
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(url)
+            video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
+            if video_element:
+                video_link = video_element.get_attribute("src")
+                browser.close()
+                print(json.dumps({"video_link": video_link}, indent=4))
+                return video_link
+            else:
+                browser.close()
+                print(json.dumps({"video_link": None}, indent=4))
+                return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 def scrape_episode_list(url):
     """
@@ -75,7 +105,11 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1:
         url = sys.argv[1]
-        scrape_episode_list(url)
+        if len(sys.argv) > 2:
+            episode_url = sys.argv[2]
+            scrape_video_link(episode_url)
+        else:
+            scrape_episode_list(url)
     else:
         url = "https://samehadaku.click/daftar-anime-2/?list"
         scrape_anime_list(url)
