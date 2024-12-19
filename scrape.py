@@ -85,8 +85,8 @@ def scrape_video_link(url):
                         elif not preferred_link:
                             preferred_link = option
                 if preferred_link:
-                    preferred_link.click()
-                    page.wait_for_timeout(500)
+                    link = page.locator(preferred_link).evaluate("el => el.href")
+                    page.goto(link)
                     page.wait_for_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
                     video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
                     if video_element:
