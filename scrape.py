@@ -65,6 +65,16 @@ def scrape_video_link(url):
             page = browser.new_page()
             page.goto(url)
             page.evaluate("document.querySelectorAll('.box_item_ads_popup').forEach(el => el.remove());")
+            # Remove elements containing "iklan"
+            page.evaluate("""
+                () => {
+                    document.querySelectorAll('*').forEach(el => {
+                        if (el.textContent && el.textContent.toLowerCase().includes('iklan')) {
+                            el.remove();
+                        }
+                    });
+                }
+            """)
             page.click(".m480p")
             page.wait_for_timeout(500)
             page.wait_for_function("""
