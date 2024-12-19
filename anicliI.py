@@ -44,8 +44,34 @@ def search_anime(anime_data):
             if selected_anime:
                 clear_terminal()
                 print(f"Fetching episodes for: {selected_anime['text']}")
-                subprocess.run(['python', 'scrape.py', selected_anime['link']])
-                input("Press Enter to continue...")
+                try:
+                    process = subprocess.run(['python', 'scrape.py', selected_anime['link']], capture_output=True, text=True, check=True)
+                    episode_data = json.loads(process.stdout)
+                    if episode_
+                        episode_choices = [f"{ep['text']}" for ep in episode_data]
+                        episode_questions = [
+                            inquirer.List('selected_episode',
+                                          message="Select an episode:",
+                                          choices=episode_choices,
+                                          ),
+                        ]
+                        episode_answers = inquirer.prompt(episode_questions)
+                        if episode_answers:
+                            selected_episode_text = episode_answers['selected_episode']
+                            selected_episode = next((ep for ep in episode_data if ep['text'] == selected_episode_text), None)
+                            if selected_episode:
+                                print(f"You selected: {selected_episode['text']}")
+                                # Placeholder for future episode scraping
+                                input("Press Enter to continue...")
+                    else:
+                        print("No episodes found.")
+                        input("Press Enter to continue...")
+                except subprocess.CalledProcessError as e:
+                    print(f"Error running scrape.py: {e}")
+                    input("Press Enter to continue...")
+                except json.JSONDecodeError as e:
+                    print(f"Error decoding JSON: {e}")
+                    input("Press Enter to continue...")
     else:
         print("\nNo matching anime found.")
         input("Press Enter to continue...")
