@@ -49,7 +49,13 @@ def scrape_video_link(url):
     """
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=False)
+            browser = p.chromium.launch(
+                headless=False,
+                args=[
+                    "--disable-popup-blocking",
+                    "--block-new-web-contents",
+                ],
+            )
             page = browser.new_page()
             page.goto(url)
             page.click(".m480p")
