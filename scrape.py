@@ -72,8 +72,6 @@ def scrape_video_link(url):
                     return false;
                 }
             """)
-            
-            original_page = page
 
             preferred_link = None
             quality_options = page.query_selector_all(".m720p li a, .m480p li a")
@@ -87,23 +85,14 @@ def scrape_video_link(url):
                         elif not preferred_link:
                             preferred_link = option
                 if preferred_link:
+                    preferred_link.click()
+                    page.wait_for_timeout(500)
                     page.wait_for_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
                     video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
                     if video_element:
                         video_link = video_element.get_attribute("src")
-                        
-                        # Close any new tabs that might have opened
-                        for p in browser.pages:
-                            if p != original_page:
-                                p.close()
-                        
                         browser.close()
                         return {"video_link": video_link}
-            
-            # Close any new tabs that might have opened
-            for p in browser.pages:
-                if p != original_page:
-                    p.close()
             browser.close()
             return {"video_link": None}
     except Exception as e:
