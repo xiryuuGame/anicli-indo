@@ -18,8 +18,13 @@ def scrape_anime_list(url):
         process = subprocess.run(['curl', '-s', url], capture_output=True, text=True, check=True)
         html_content = process.stdout
 
-        # Parse the HTML content with BeautifulSoup
+        # Remove elements containing "iklan"
         soup = BeautifulSoup(html_content, 'html.parser')
+        for element in soup.find_all(text=lambda text: text and "iklan" in text.lower()):
+            element.extract()
+
+        # Parse the HTML content with BeautifulSoup
+        # soup = BeautifulSoup(html_content, 'html.parser')
 
         # Find all the anime list items
         anime_list_items = soup.select('ul > li > a.hodebgst')
@@ -115,8 +120,13 @@ def scrape_episode_list(url):
         process = subprocess.run(['curl', '-s', url], capture_output=True, text=True, check=True)
         html_content = process.stdout
 
-        # Parse the HTML content with BeautifulSoup
+        # Remove elements containing "iklan"
         soup = BeautifulSoup(html_content, 'html.parser')
+        for element in soup.find_all(text=lambda text: text and "iklan" in text.lower()):
+            element.extract()
+
+        # Parse the HTML content with BeautifulSoup
+        # soup = BeautifulSoup(html_content, 'html.parser')
 
         # Find all the episode list items
         episode_list_items = soup.select('#venkonten > div.venser > div:nth-child(8) > ul > li > span:nth-child(1) > a')
