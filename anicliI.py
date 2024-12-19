@@ -30,11 +30,25 @@ def search_anime(anime_data):
     
     if matching_anime:
         print("\nMatching anime:")
-        for item in matching_anime:
-            print(f"- {item['text']}")
+        choices = [f"{item['text']}" for item in matching_anime]
+        questions = [
+            inquirer.List('selected_anime',
+                          message="Select an anime for episodes:",
+                          choices=choices,
+                          ),
+        ]
+        answers = inquirer.prompt(questions)
+        if answers:
+            selected_anime_text = answers['selected_anime']
+            selected_anime = next((item for item in matching_anime if item['text'] == selected_anime_text), None)
+            if selected_anime:
+                clear_terminal()
+                print(f"Fetching episodes for: {selected_anime['text']}")
+                subprocess.run(['python', 'scrape.py', selected_anime['link']])
+                input("Press Enter to continue...")
     else:
         print("\nNo matching anime found.")
-    input("Press Enter to continue...")
+        input("Press Enter to continue...")
 
 def main():
     """Main function to run the CLI application."""
