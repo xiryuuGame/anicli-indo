@@ -43,7 +43,7 @@ def scrape_anime_list(url):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def scrape_video_link(url):
+def scrape_video_link(url, user_agent):
     """
     Scrapes the video link from a given episode URL using Playwright.
 
@@ -55,8 +55,8 @@ def scrape_video_link(url):
     """
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch()
-            context = browser.new_context()  # New browser context to isolate session
+            browser = p.chromium.launch(args=[f'--user-agent={user_agent}'])
+            context = browser.new_context(user_agent=user_agent)  # New browser context to isolate session
             page = context.new_page()
 
             # Handle popup windows and close them automatically
@@ -170,8 +170,12 @@ if __name__ == "__main__":
         url = sys.argv[1]
         if len(sys.argv) > 2:
             episode_url = sys.argv[2]
-            video_data = scrape_video_link(episode_url)
-            print(json.dumps(video_data, indent=4))
+            if len(sys.argv) > 3:
+                user_agent = sys.argv[3]
+                video_data = scrape_video_link(episode_url, user_agent)
+                print(json.dumps(video_data, indent=4))
+            else:
+                print(json.dumps({"error": "User-agent is missing."}))
         else:
             scrape_episode_list(url)
     else:
