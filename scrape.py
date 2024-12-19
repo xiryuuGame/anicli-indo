@@ -1,4 +1,5 @@
 import subprocess
+import json
 from bs4 import BeautifulSoup
 
 def scrape_anime_list(url):
@@ -22,11 +23,13 @@ def scrape_anime_list(url):
         # Find all the anime list items
         anime_list_items = soup.select('#main > div.listpst > div > div.listttl > ul > li > a')
 
-        # Extract and print the link and text for each item
+        anime_data = []
         for item in anime_list_items:
             link = item['href']
             text = item.get_text(strip=True)
-            print(f"Link: {link}, Text: {text}")
+            anime_data.append({"link": link, "text": text})
+
+        print(json.dumps(anime_data, indent=4))
 
     except subprocess.CalledProcessError as e:
         print(f"Error fetching URL: {e}")
