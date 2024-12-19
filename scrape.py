@@ -52,14 +52,30 @@ def scrape_video_link(url):
             browser = p.chromium.launch(headless=False)
             page = browser.new_page()
             page.goto(url)
-            video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
-            if video_element:
-                video_link = video_element.get_attribute("src")
-                browser.close()
-                return {"video_link": video_link}
-            else:
-                browser.close()
-                return {"video_link": None}
+            page.click(".m480p")
+            page.wait_for_selector(".m480p li a")
+
+            preferred_link = None
+            quality_options = page.query_selector_all(".m720p li a, .m480p li a")
+            
+            if quality_options:
+                for option in quality_options:
+                    if option.text_content() in ["desudesu", "desudesu2", "otakustream", "otakuplay", "desudrive", "ondesuhd", "ondesu3", "updesu", "playdesu"]:
+                        if ".m720p" in option.locator.selector:
+                            preferred_link = option
+                            break
+                        elif not preferred_link:
+                            preferred_link = option
+                if preferred_link:
+                    preferred_link.click()
+                    page.wait_for_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
+                    video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
+                    if video_element:
+                        video_link = video_element.get_attribute("src")
+                        browser.close()
+                        return {"video_link": video_link}
+            browser.close()
+            return {"video_link": None}
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
