@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import inquirer
 
 def fetch_anime_data():
     """Fetches anime data by running scrape.py and returns it as a list."""
@@ -14,14 +15,6 @@ def fetch_anime_data():
         print(f"Error decoding JSON: {e}")
         return []
 
-def display_menu(options, selected_index):
-    """Displays the menu with the current selection highlighted."""
-    os.system('cls' if os.name == 'nt' else 'clear')  # Clear the console
-    for i, option in enumerate(options):
-        if i == selected_index:
-            print(f"> {option}")
-        else:
-            print(f"  {option}")
 
 def search_anime(anime_data):
     """Allows the user to search for anime titles."""
@@ -46,20 +39,18 @@ def main():
         return
 
     options = ["Search"]
-    selected_index = 0
-
+    questions = [
+        inquirer.List('action',
+                      message="What do you want to do?",
+                      choices=options,
+                      ),
+    ]
     while True:
-        display_menu(options, selected_index)
-
-        key = input()
-        if key == '\x1b[A':  # Up arrow
-            selected_index = (selected_index - 1) % len(options)
-        elif key == '\x1b[B':  # Down arrow
-            selected_index = (selected_index + 1) % len(options)
-        elif key == '\r':  # Enter key
-            if options[selected_index] == "Search":
+        answers = inquirer.prompt(questions)
+        if answers:
+            if answers['action'] == "Search":
                 search_anime(anime_data)
-        elif key == '\x03': # Ctrl+C
+        else:
             break
 
 if __name__ == "__main__":
