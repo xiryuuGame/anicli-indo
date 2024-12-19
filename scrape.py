@@ -85,12 +85,21 @@ def scrape_video_link(url, user_agent):
             # Select preferred quality link
             quality_buttons = page.query_selector_all(".m720p li a, .m480p li a")
             preferred_link = None
+            
 
             for button in quality_buttons:
                 text = button.text_content().strip().lower()
                 if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
                     preferred_link = button
                     break
+            
+            if not preferred_link:
+                quality_buttons = page.query_selector_all(".m480p li a, .m720p li a")
+                for button in quality_buttons:
+                    text = button.text_content().strip().lower()
+                    if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
+                        preferred_link = button
+                        break
 
             if not preferred_link:
                 return {"error": "No preferred video quality found."}
