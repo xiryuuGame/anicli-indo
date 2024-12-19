@@ -65,14 +65,19 @@ def scrape_video_link(url):
             page = browser.new_page()
             page.goto(url)
             page.evaluate("document.querySelectorAll('.box_item_ads_popup').forEach(el => el.remove());")
-            # Remove elements containing "iklan"
+            # Remove text nodes containing "iklan"
             page.evaluate("""
                 () => {
-                    document.querySelectorAll('*').forEach(el => {
-                        if (el.textContent && el.textContent.toLowerCase().includes('iklan')) {
-                            el.remove();
+                    function recursivelyRemoveText(node) {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            if (node.textContent && node.textContent.toLowerCase().includes('iklan')) {
+                                node.remove();
+                            }
+                        } else if (node.nodeType === Node.ELEMENT_NODE) {
+                            node.childNodes.forEach(recursivelyRemoveText);
                         }
-                    });
+                    }
+                    recursivelyRemoveText(document.body);
                 }
             """)
             page.click(".m480p")
