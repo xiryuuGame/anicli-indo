@@ -49,7 +49,7 @@ def scrape_video_link(url):
     """
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch()
+            browser = p.chromium.launch(headless=False)
             page = browser.new_page()
             page.goto(url)
             video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
