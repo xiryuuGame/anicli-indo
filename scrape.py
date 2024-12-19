@@ -22,7 +22,7 @@ def scrape_anime_list(url):
         soup = BeautifulSoup(html_content, 'html.parser')
 
         # Find all the anime list items
-        anime_list_items = soup.select('#main > div.listpst > div > div.listttl > ul > li > a')
+        anime_list_items = soup.select('ul > li > a.hodebgst')
 
         anime_data = []
         for item in anime_list_items:
@@ -83,7 +83,7 @@ def scrape_episode_list(url):
         soup = BeautifulSoup(html_content, 'html.parser')
 
         # Find all the episode list items
-        episode_list_items = soup.select('#infoarea > div > div.whites.lsteps.widget_senction > div.lstepsiode.listeps > ul > li > div.epsleft > span.lchx > a')
+        episode_list_items = soup.select('#venkonten > div.venser > div:nth-child(8) > ul > li > span:nth-child(1) > a')
 
         episode_data = []
         for item in episode_list_items:
@@ -110,5 +110,5 @@ if __name__ == "__main__":
         else:
             scrape_episode_list(url)
     else:
-        url = "https://samehadaku.click/daftar-anime-2/?list"
+        url = "https://otakudesu.cloud/anime-list/"
         scrape_anime_list(url)
