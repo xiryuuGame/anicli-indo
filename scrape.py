@@ -53,7 +53,17 @@ def scrape_video_link(url):
             page = browser.new_page()
             page.goto(url)
             page.click(".m480p")
-            page.wait_for_selector(".m480p li a")
+            page.wait_for_function("""
+                () => {
+                    const options = document.querySelectorAll('.m480p li a, .m720p li a');
+                    for (const option of options) {
+                        if (option.offsetParent !== null) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            """)
 
             preferred_link = None
             quality_options = page.query_selector_all(".m720p li a, .m480p li a")
