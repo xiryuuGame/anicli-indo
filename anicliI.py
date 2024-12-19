@@ -124,7 +124,7 @@ def main():
     if not anime_data:
         return
 
-    options = ["Search"]
+    options = ["List Anime", "Search", "Exit"]
     questions = [
         inquirer.List('action',
                       message="What do you want to do?",
@@ -135,8 +135,15 @@ def main():
         clear_terminal()
         answers = inquirer.prompt(questions)
         if answers:
-            if answers['action'] == "Search":
+            if answers['action'] == "List Anime":
+                print("\nAnime List:")
+                for item in anime_data:
+                    print(f"- {item['text']}")
+                input("\nPress Enter to continue...")
+            elif answers['action'] == "Search":
                 search_anime(anime_data)
+            elif answers['action'] == "Exit":
+                break
         else:
             break
 
