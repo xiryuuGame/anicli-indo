@@ -47,7 +47,7 @@ def search_anime(anime_data):
                 try:
                     process = subprocess.run(['python', 'scrape.py', selected_anime['link']], capture_output=True, text=True, check=True)
                     episode_data = json.loads(process.stdout)
-                    if episode_
+                    if episode_data:
                         episode_choices = [f"{ep['text']}" for ep in episode_data]
                         episode_questions = [
                             inquirer.List('selected_episode',
