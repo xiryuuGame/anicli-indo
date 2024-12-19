@@ -54,6 +54,7 @@ def scrape_video_link(url):
                 args=[
                     "--disable-popup-blocking",
                     "--block-new-web-contents",
+                    "--dns-server=94.140.14.14,94.140.15.15"
                 ],
             )
             page = browser.new_page()
