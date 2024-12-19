@@ -58,6 +58,7 @@ def scrape_video_link(url):
             )
             page = browser.new_page()
             page.goto(url)
+            page.evaluate("document.querySelectorAll('.box_item_ads_popup').forEach(el => el.remove());")
             page.click(".m480p")
             page.wait_for_function("""
                 () => {
