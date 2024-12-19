@@ -60,6 +60,7 @@ def scrape_video_link(url):
             page.goto(url)
             page.evaluate("document.querySelectorAll('.box_item_ads_popup').forEach(el => el.remove());")
             page.click(".m480p")
+            page.wait_for_timeout(500)
             page.wait_for_function("""
                 () => {
                     const options = document.querySelectorAll('.m480p li a, .m720p li a');
@@ -85,6 +86,7 @@ def scrape_video_link(url):
                             preferred_link = option
                 if preferred_link:
                     preferred_link.click()
+                    page.wait_for_timeout(500)
                     page.wait_for_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
                     video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
                     if video_element:
