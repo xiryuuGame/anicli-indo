@@ -3,6 +3,10 @@ import os
 import subprocess
 import inquirer
 
+def clear_terminal():
+    """Clears the terminal screen."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def fetch_anime_data():
     """Fetches anime data by running scrape.py and returns it as a list."""
     try:
@@ -46,6 +50,7 @@ def main():
                       ),
     ]
     while True:
+        clear_terminal()
         answers = inquirer.prompt(questions)
         if answers:
             if answers['action'] == "Search":
