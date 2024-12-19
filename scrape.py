@@ -56,12 +56,10 @@ def scrape_video_link(url):
             if video_element:
                 video_link = video_element.get_attribute("src")
                 browser.close()
-                print(json.dumps({"video_link": video_link}, indent=4))
-                return video_link
+                return {"video_link": video_link}
             else:
                 browser.close()
-                print(json.dumps({"video_link": None}, indent=4))
-                return None
+                return {"video_link": None}
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
@@ -107,7 +105,8 @@ if __name__ == "__main__":
         url = sys.argv[1]
         if len(sys.argv) > 2:
             episode_url = sys.argv[2]
-            scrape_video_link(episode_url)
+            video_data = scrape_video_link(episode_url)
+            print(json.dumps(video_data, indent=4))
         else:
             scrape_episode_list(url)
     else:
