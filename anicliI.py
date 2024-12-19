@@ -61,8 +61,20 @@ def search_anime(anime_data):
                             selected_episode = next((ep for ep in episode_data if ep['text'] == selected_episode_text), None)
                             if selected_episode:
                                 print(f"You selected: {selected_episode['text']}")
-                                # Placeholder for future episode scraping
-                                input("Press Enter to continue...")
+                                try:
+                                    process = subprocess.run(['python', 'scrape.py', selected_anime['link'], selected_episode['link']], capture_output=True, text=True, check=True)
+                                    video_data = json.loads(process.stdout)
+                                    if video_data and video_data.get('video_link'):
+                                        print(f"Video link: {video_data['video_link']}")
+                                    else:
+                                        print("No video link found.")
+                                    input("Press Enter to continue...")
+                                except subprocess.CalledProcessError as e:
+                                    print(f"Error running scrape.py: {e}")
+                                    input("Press Enter to continue...")
+                                except json.JSONDecodeError as e:
+                                    print(f"Error decoding JSON: {e}")
+                                    input("Press Enter to continue...")
                     else:
                         print("No episodes found.")
                         input("Press Enter to continue...")
