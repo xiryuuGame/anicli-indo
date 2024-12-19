@@ -84,7 +84,7 @@ def search_anime(anime_data):
                                         user_agent = random.choice(user_agents)
                                         mpv_command = [
                                             "mpv",
-                                            video_link,
+                                            f"{video_link}",
                                             "--user-agent=" + user_agent,
                                             '--http-header-fields="Referer: https://youtube.googleapis.com/"',
                                             '--http-header-fields="Accept: */*"',
