@@ -94,6 +94,8 @@ def search_anime(anime_data):
                                             '--http-header-fields="Sec-Fetch-Site: cross-site"',
                                         ]
                                         subprocess.run(mpv_command)
+                                        with open("link.txt", "w") as f:
+                                            f.write(video_link)
                                     else:
                                         print("No video link found.")
                                         input("Press Enter to continue...")
