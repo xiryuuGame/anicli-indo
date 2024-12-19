@@ -2,6 +2,7 @@ import subprocess
 import json
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
+import time
 
 def scrape_anime_list(url):
     """
@@ -50,75 +51,78 @@ def scrape_video_link(url):
         url (str): The URL of the episode page to scrape.
 
     Returns:
-        str: The video link, or None if not found.
+        dict: A dictionary containing the video link or an error message.
     """
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=False,
-                args=[
-                    "--disable-popup-blocking",
-                    "--block-new-web-contents",
-                    "--dns-server=https://dns.adguard.com/dns-query"
-                ],
-            )
-            page = browser.new_page()
+            browser = p.chromium.launch()
+            context = browser.new_context()  # New browser context to isolate session
+            page = context.new_page()
+
+            # Handle popup windows and close them automatically
+            context.on("page", lambda popup: popup.close())
+
+            # Navigate to the episode page
             page.goto(url)
-            page.evaluate("document.querySelectorAll('.box_item_ads_popup').forEach(el => el.remove());")
-            # Remove text nodes containing "iklan"
+
+            # Remove ads if they exist
             page.evaluate("""
-                () => {
-                    function recursivelyRemoveText(node) {
-                        if (node.nodeType === Node.TEXT_NODE) {
-                            if (node.textContent && node.textContent.toLowerCase().includes('iklan')) {
-                                node.remove();
-                            }
-                        } else if (node.nodeType === Node.ELEMENT_NODE) {
-                            node.childNodes.forEach(recursivelyRemoveText);
-                        }
-                    }
-                    recursivelyRemoveText(document.body);
-                }
+                document.querySelectorAll('.box_item_ads_popup, .ads-container, .ads').forEach(el => el.remove());
             """)
-            page.click(".m480p")
-            page.wait_for_timeout(500)
+
+            # Wait for the .m480p button and click it
+            page.wait_for_selector(".m480p", timeout=5000)
+
+            with page.expect_popup() as popup_info:
+                page.click(".m480p")  # Trigger the click
+            popup_info.value.close()  # Ensure popup is closed
+
+            # Delay to allow animation to complete
+            time.sleep(1)  # Adjust as needed
+
+            # Wait for the preferred quality links to appear
             page.wait_for_function("""
-                () => {
-                    const options = document.querySelectorAll('.m480p li a, .m720p li a');
-                    for (const option of options) {
-                        if (option.offsetParent !== null) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-            """)
+                () => document.querySelectorAll('.m480p li a, .m720p li a').length > 0
+            """, timeout=5000)
 
+            # Select preferred quality link
+            quality_buttons = page.query_selector_all(".m720p li a, .m480p li a")
             preferred_link = None
-            quality_options = page.query_selector_all(".m720p li a, .m480p li a")
 
-            if quality_options:
-                for option in quality_options:
-                    if option.text_content() in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu", "desudrive"]:
-                        if ".m720p" in option.locator.selector:
-                            preferred_link = option
-                            break
-                        elif not preferred_link:
-                            preferred_link = option
-                if preferred_link:
-                    preferred_link.click()
-                    page.wait_for_timeout(2000)
-                    page.wait_for_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
-                    video_element = page.query_selector("#oframeplayerjs > pjsdiv:nth-child(3) > video")
+            for button in quality_buttons:
+                text = button.text_content().strip().lower()
+                if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
+                    preferred_link = button
+                    break
+
+            if not preferred_link:
+                return {"error": "No preferred video quality found."}
+
+            # Handle popup when clicking the preferred link
+            preferred_link.click()
+
+            # Delay to wait for the video player to load
+            time.sleep(2)
+            iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
+            if iframe:
+                frame = iframe.content_frame()
+                if frame:
+                    # Tunggu konten iframe dimuat
+                    frame.wait_for_selector("video", timeout=10000)
+                    video_element = frame.query_selector("video")
                     if video_element:
                         video_link = video_element.get_attribute("src")
                         browser.close()
                         return {"video_link": video_link}
-            # browser.close()
-            return {"video_link": None}
+                else:
+                    return {"error": "Failed to load iframe content."}
+            else:
+                return {"error": "Iframe not found."}
+
+            return {"error": "Video element not found."}
+
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+        return {"error": str(e)}
 
 def scrape_episode_list(url):
     """
