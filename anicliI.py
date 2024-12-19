@@ -60,15 +60,30 @@ def search_anime(anime_data):
                             selected_episode_text = episode_answers['selected_episode']
                             selected_episode = next((ep for ep in episode_data if ep['text'] == selected_episode_text), None)
                             if selected_episode:
-                                print(f"You selected: {selected_episode['text']}")
+                                clear_terminal()
+                                print("\n\n\n")
+                                print(" " * int(os.get_terminal_size().columns / 2 - len("SEDANG MENYIAPKAN VIDEO...") / 2) + "SEDANG MENYIAPKAN VIDEO...")
                                 try:
                                     process = subprocess.run(['python', 'scrape.py', selected_anime['link'], selected_episode['link']], capture_output=True, text=True, check=True)
                                     video_data = json.loads(process.stdout)
                                     if video_data and video_data.get('video_link'):
-                                        print(f"Video link: {video_data['video_link']}")
+                                        video_link = video_data['video_link']
+                                        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                                        mpv_command = [
+                                            "mpv",
+                                            video_link,
+                                            "--user-agent=" + user_agent,
+                                            '--http-header-fields="Referer: https://youtube.googleapis.com/"',
+                                            '--http-header-fields="Accept: */*"',
+                                            '--http-header-fields="Accept-Encoding: identity;q=1, *;q=0"',
+                                            '--http-header-fields="Sec-Fetch-Dest: video"',
+                                            '--http-header-fields="Sec-Fetch-Mode: no-cors"',
+                                            '--http-header-fields="Sec-Fetch-Site: cross-site"',
+                                        ]
+                                        subprocess.run(mpv_command)
                                     else:
                                         print("No video link found.")
-                                    input("Press Enter to continue...")
+                                        input("Press Enter to continue...")
                                 except subprocess.CalledProcessError as e:
                                     print(f"Error running scrape.py: {e}")
                                     input("Press Enter to continue...")
