@@ -42,7 +42,7 @@ def search_anime(anime_data):
 def main():
     """Main function to run the CLI application."""
     anime_data = fetch_anime_data()
-    if not anime_data
+    if not anime_data:
         return
 
     options = ["Search"]
