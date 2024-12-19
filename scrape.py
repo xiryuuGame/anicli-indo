@@ -55,7 +55,7 @@ def scrape_video_link(url, user_agent):
     """
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(args=[f'--user-agent={user_agent}'])
+            browser = p.chromium.launch(args=[f'--user-agent={user_agent}'], headless=False)
             context = browser.new_context(user_agent=user_agent)  # New browser context to isolate session
             page = context.new_page()
 
@@ -76,9 +76,6 @@ def scrape_video_link(url, user_agent):
             with page.expect_popup() as popup_info:
                 page.click(".m480p")  # Trigger the click
             popup_info.value.close()  # Ensure popup is closed
-
-            # Delay to allow animation to complete
-            time.sleep(1)  # Adjust as needed
 
             # Wait for the preferred quality links to appear
             page.wait_for_function("""
@@ -102,9 +99,11 @@ def scrape_video_link(url, user_agent):
             preferred_link.click()
 
             # Delay to wait for the video player to load
-            time.sleep(2)
+            time.sleep(5)
             iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
             if iframe:
+                #tampilkan iframe
+                print(iframe.evaluate("el => el.outerHTML"))
                 frame = iframe.content_frame()
                 if frame:
                     # Tunggu konten iframe dimuat
