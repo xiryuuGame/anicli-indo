@@ -55,7 +55,7 @@ def scrape_video_link(url, user_agent):
     """
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(args=[f'--user-agent={user_agent}'], headless=False)
+            browser = p.chromium.launch(args=[f'--user-agent={user_agent}'])
             context = browser.new_context(user_agent=user_agent)  # New browser context to isolate session
             page = context.new_page()
 
@@ -83,7 +83,7 @@ def scrape_video_link(url, user_agent):
             """, timeout=5000)
 
             # Select preferred quality link
-            quality_buttons = page.query_selector_all(".m720p li a, .m480p li a")
+            quality_buttons = page.query_selector_all(".m720p li a")
             preferred_link = None
             
 
@@ -92,15 +92,15 @@ def scrape_video_link(url, user_agent):
                 if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
                     preferred_link = button
                     break
+                else:
+                    quality_buttons = page.query_selector_all(".m480p li a")
+                    for button in quality_buttons:
+                        text = button.text_content().strip().lower()
+                        if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
+                            preferred_link = button
+                            break
+                    
             
-            if not preferred_link:
-                quality_buttons = page.query_selector_all(".m480p li a, .m720p li a")
-                for button in quality_buttons:
-                    text = button.text_content().strip().lower()
-                    if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
-                        preferred_link = button
-                        break
-
             if not preferred_link:
                 return {"error": "No preferred video quality found."}
 
@@ -111,8 +111,6 @@ def scrape_video_link(url, user_agent):
             time.sleep(5)
             iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
             if iframe:
-                #tampilkan iframe
-                print(iframe.evaluate("el => el.outerHTML"))
                 frame = iframe.content_frame()
                 if frame:
                     # Tunggu konten iframe dimuat
