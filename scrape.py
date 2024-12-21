@@ -106,19 +106,17 @@ def scrape_video_link(url, user_agent):
                                 video_element = frame.query_selector("video")
                                 if video_element:
                                     video_link = video_element.get_attribute("src")
-                                    browser.close()
-                                    return {"video_link": video_link}
-                                else:
-                                    continue # Try next button
-                            else:
-                                continue # Try next button
-                        else:
-                            continue # Try next button
+                                    break # Found a video link, break the inner loop
+                                
+                            
+                        
+                    if video_link:
+                        break # Found a video link, break the inner loop
                 if video_link:
-                    break # Found a video link, no need to try other qualities
+                    break # Found a video link, break the outer loop
             
+            browser.close()
             if not video_link:
-                browser.close()
                 return {"error": "No video link found."}
             
             return {"video_link": video_link}
