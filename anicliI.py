@@ -79,14 +79,19 @@ def search_anime(anime_data):
                                 user_agent = random.choice(user_agents)
                                 try:
                                     process = subprocess.run(['python', 'scrape.py', selected_anime['link'], selected_episode['link'], user_agent], capture_output=True, text=True, check=True)
-                                    video_data = json.loads(process.stdout)
-                                    if video_data and video_data.get('video_link'):
-                                        video_links = video_data['video_link'] if isinstance(video_data['video_link'], list) else [video_data['video_link']]
+                                    try:
+                                        with open("link.json", "r") as f:
+                                            video_data = json.load(f)
                                         
-                                        for video_link in video_links:
+                                        video_links_720p = video_data.get("720p", [])
+                                        video_links_480p = video_data.get("480p", [])
+                                        
+                                        video_link = None
+                                        
+                                        for link in video_links_720p:
                                             mpv_command = [
                                                 "mpv",
-                                                f"{video_link}",
+                                                f"{link}",
                                                 "--user-agent=" + user_agent,
                                                 '--http-header-fields="Referer: https://youtube.googleapis.com/"',
                                                 '--http-header-fields="Accept: */*"',
@@ -96,18 +101,43 @@ def search_anime(anime_data):
                                                 '--http-header-fields="Sec-Fetch-Site: cross-site"',
                                             ]
                                             process = subprocess.run(mpv_command, capture_output=True, text=True)
+                                            if "(+)" in process.stderr and "Video --vid=1 (*)" in process.stderr:
+                                                video_link = link
+                                                break
+                                        
+                                        if not video_link:
+                                            for link in video_links_480p:
+                                                mpv_command = [
+                                                    "mpv",
+                                                    f"{link}",
+                                                    "--user-agent=" + user_agent,
+                                                    '--http-header-fields="Referer: https://youtube.googleapis.com/"',
+                                                    '--http-header-fields="Accept: */*"',
+                                                    '--http-header-fields="Accept-Encoding: identity;q=1, *;q=0"',
+                                                    '--http-header-fields="Sec-Fetch-Dest: video"',
+                                                    '--http-header-fields="Sec-Fetch-Mode: no-cors"',
+                                                    '--http-header-fields="Sec-Fetch-Site: cross-site"',
+                                                ]
+                                                process = subprocess.run(mpv_command, capture_output=True, text=True)
+                                                if "(+)" in process.stderr and "Video --vid=1 (*)" in process.stderr:
+                                                    video_link = link
+                                                    break
+                                        
+                                        if video_link:
                                             with open("link.txt", "w") as f:
                                                 f.write(video_link)
-                                            break
-                                    else:
-                                        print("No video link found.")
+                                        else:
+                                            print("No suitable video link found.")
+                                            input("Press Enter to continue...")
+                                    except FileNotFoundError:
+                                        print("link.json not found.")
                                         input("Press Enter to continue...")
-                                except subprocess.CalledProcessError as e:
-                                    print(f"Error running scrape.py: {e}")
-                                    input("Press Enter to continue...")
-                                except json.JSONDecodeError as e:
-                                    print(f"Error decoding JSON: {e}")
-                                    input("Press Enter to continue...")
+                                    except json.JSONDecodeError:
+                                        print("Error decoding link.json.")
+                                        input("Press Enter to continue...")
+                                    except subprocess.CalledProcessError as e:
+                                        print(f"Error running scrape.py: {e}")
+                                        input("Press Enter to continue...")
                     else:
                         print("No episodes found.")
                         input("Press Enter to continue...")
@@ -203,18 +233,23 @@ def main():
                                                         '--http-header-fields="Sec-Fetch-Mode: no-cors"',
                                                         '--http-header-fields="Sec-Fetch-Site: cross-site"',
                                                     ]
-                                                    subprocess.run(mpv_command)
-                                                    with open("link.txt", "w") as f:
-                                                        f.write(video_link)
-                                                else:
-                                                    print("No video link found.")
-                                                    input("Press Enter to continue...")
-                                            except subprocess.CalledProcessError as e:
-                                                print(f"Error running scrape.py: {e}")
-                                                input("Press Enter to continue...")
-                                            except json.JSONDecodeError as e:
-                                                print(f"Error decoding JSON: {e}")
-                                                input("Press Enter to continue...")
+                                                    
+                                        
+                                        if video_link:
+                                            with open("link.txt", "w") as f:
+                                                f.write(video_link)
+                                        else:
+                                            print("No suitable video link found.")
+                                            input("Press Enter to continue...")
+                                    except FileNotFoundError:
+                                        print("link.json not found.")
+                                        input("Press Enter to continue...")
+                                    except json.JSONDecodeError:
+                                        print("Error decoding link.json.")
+                                        input("Press Enter to continue...")
+                                    except subprocess.CalledProcessError as e:
+                                        print(f"Error running scrape.py: {e}")
+                                        input("Press Enter to continue...")
                                 else:
                                     print("No episodes found.")
                                     input("Press Enter to continue...")

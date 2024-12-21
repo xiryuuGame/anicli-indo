@@ -82,50 +82,53 @@ def scrape_video_link(url, user_agent):
                 () => document.querySelectorAll('.m480p li a, .m720p li a').length > 0
             """, timeout=5000)
 
-            # Select preferred quality link
-            quality_buttons = page.query_selector_all(".m720p li a")
-            preferred_link = None
-            
+            video_links = {"720p": [], "480p": []}
 
-            for button in quality_buttons:
+            # Function to extract video link from iframe
+            def extract_video_link(frame):
+                frame.wait_for_selector("video", timeout=10000)
+                video_element = frame.query_selector("video")
+                if video_element:
+                    return video_element.get_attribute("src")
+                return None
+
+            # Select preferred quality links
+            quality_buttons_720p = page.query_selector_all(".m720p li a")
+            for button in quality_buttons_720p:
                 text = button.text_content().strip().lower()
                 if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
-                    preferred_link = button
-                    break
-                else:
-                    quality_buttons = page.query_selector_all(".m480p li a")
-                    for button in quality_buttons:
-                        text = button.text_content().strip().lower()
-                        if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
-                            preferred_link = button
-                            break
-                    
+                    with page.expect_popup() as popup_info:
+                        button.click()
+                    popup_info.value.close()
+                    time.sleep(5)
+                    iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
+                    if iframe:
+                        frame = iframe.content_frame()
+                        if frame:
+                            video_link = extract_video_link(frame)
+                            if video_link:
+                                video_links["720p"].append(video_link)
+
+            quality_buttons_480p = page.query_selector_all(".m480p li a")
+            for button in quality_buttons_480p:
+                text = button.text_content().strip().lower()
+                if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
+                    with page.expect_popup() as popup_info:
+                        button.click()
+                    popup_info.value.close()
+                    time.sleep(5)
+                    iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
+                    if iframe:
+                        frame = iframe.content_frame()
+                        if frame:
+                            video_link = extract_video_link(frame)
+                            if video_link:
+                                video_links["480p"].append(video_link)
             
-            if not preferred_link:
-                return {"error": "No preferred video quality found."}
-
-            # Handle popup when clicking the preferred link
-            preferred_link.click()
-
-            # Delay to wait for the video player to load
-            time.sleep(5)
-            iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
-            if iframe:
-                frame = iframe.content_frame()
-                if frame:
-                    # Tunggu konten iframe dimuat
-                    frame.wait_for_selector("video", timeout=10000)
-                    video_element = frame.query_selector("video")
-                    if video_element:
-                        video_link = video_element.get_attribute("src")
-                        browser.close()
-                        return {"video_link": video_link}
-                else:
-                    return {"error": "Failed to load iframe content."}
-            else:
-                return {"error": "Iframe not found."}
-
-            return {"error": "Video element not found."}
+            browser.close()
+            with open("link.json", "w") as f:
+                json.dump(video_links, f, indent=4)
+            return {"video_links": video_links}
 
     except Exception as e:
         return {"error": str(e)}
