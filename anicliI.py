@@ -138,15 +138,15 @@ def search_anime(anime_data):
                                     except subprocess.CalledProcessError as e:
                                         print(f"Error running scrape.py: {e}")
                                         input("Press Enter to continue...")
-                    else:
-                        print("No episodes found.")
-                        input("Press Enter to continue...")
-                except subprocess.CalledProcessError as e:
-                    print(f"Error running scrape.py: {e}")
-                    input("Press Enter to continue...")
-                except json.JSONDecodeError as e:
-                    print(f"Error decoding JSON: {e}")
-                    input("Press Enter to continue...")
+                                else:
+                                    print("No episodes found.")
+                                    input("Press Enter to continue...")
+                        except subprocess.CalledProcessError as e:
+                            print(f"Error running scrape.py: {e}")
+                            input("Press Enter to continue...")
+                        except json.JSONDecodeError as e:
+                            print(f"Error decoding JSON: {e}")
+                            input("Press Enter to continue...")
     else:
         print("\nNo matching anime found.")
         input("Press Enter to continue...")
