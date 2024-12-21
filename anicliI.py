@@ -83,7 +83,6 @@ def search_anime(anime_data):
                                     if video_data and video_data.get('video_link'):
                                         video_links = video_data['video_link'] if isinstance(video_data['video_link'], list) else [video_data['video_link']]
                                         
-                                        played = False
                                         for video_link in video_links:
                                             mpv_command = [
                                                 "mpv",
@@ -97,13 +96,9 @@ def search_anime(anime_data):
                                                 '--http-header-fields="Sec-Fetch-Site: cross-site"',
                                             ]
                                             process = subprocess.run(mpv_command, capture_output=True, text=True)
-                                            if "(+) Video --vid=1 (*)" in process.stdout:
-                                                with open("link.txt", "w") as f:
-                                                    f.write(video_link)
-                                                played = True
-                                                break
-                                        if not played:
-                                            print("Error: Failed to play video with mpv.")
+                                            with open("link.txt", "w") as f:
+                                                f.write(video_link)
+                                            break
                                     else:
                                         print("No video link found.")
                                         input("Press Enter to continue...")
