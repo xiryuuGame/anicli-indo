@@ -81,24 +81,29 @@ def search_anime(anime_data):
                                     process = subprocess.run(['python', 'scrape.py', selected_anime['link'], selected_episode['link'], user_agent], capture_output=True, text=True, check=True)
                                     video_data = json.loads(process.stdout)
                                     if video_data and video_data.get('video_link'):
-                                        video_link = video_data['video_link']
-                                        mpv_command = [
-                                            "mpv",
-                                            f"{video_link}",
-                                            "--user-agent=" + user_agent,
-                                            '--http-header-fields="Referer: https://youtube.googleapis.com/"',
-                                            '--http-header-fields="Accept: */*"',
-                                            '--http-header-fields="Accept-Encoding: identity;q=1, *;q=0"',
-                                            '--http-header-fields="Sec-Fetch-Dest: video"',
-                                            '--http-header-fields="Sec-Fetch-Mode: no-cors"',
-                                            '--http-header-fields="Sec-Fetch-Site: cross-site"',
-                                        ]
-                                        process = subprocess.run(mpv_command, capture_output=True, text=True)
-                                        if "(+) Video --vid=1 (*)" not in process.stdout:
+                                        video_links = video_data['video_link'] if isinstance(video_data['video_link'], list) else [video_data['video_link']]
+                                        
+                                        played = False
+                                        for video_link in video_links:
+                                            mpv_command = [
+                                                "mpv",
+                                                f"{video_link}",
+                                                "--user-agent=" + user_agent,
+                                                '--http-header-fields="Referer: https://youtube.googleapis.com/"',
+                                                '--http-header-fields="Accept: */*"',
+                                                '--http-header-fields="Accept-Encoding: identity;q=1, *;q=0"',
+                                                '--http-header-fields="Sec-Fetch-Dest: video"',
+                                                '--http-header-fields="Sec-Fetch-Mode: no-cors"',
+                                                '--http-header-fields="Sec-Fetch-Site: cross-site"',
+                                            ]
+                                            process = subprocess.run(mpv_command, capture_output=True, text=True)
+                                            if "(+) Video --vid=1 (*)" in process.stdout:
+                                                with open("link.txt", "w") as f:
+                                                    f.write(video_link)
+                                                played = True
+                                                break
+                                        if not played:
                                             print("Error: Failed to play video with mpv.")
-                                        else:
-                                            with open("link.txt", "w") as f:
-                                                f.write(video_link)
                                     else:
                                         print("No video link found.")
                                         input("Press Enter to continue...")

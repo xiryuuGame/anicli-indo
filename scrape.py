@@ -119,7 +119,21 @@ def scrape_video_link(url, user_agent):
             if not video_link:
                 return {"error": "No video link found."}
             
-            return {"video_link": video_link}
+            if not video_link:
+                return {"error": "No video link found."}
+            
+            if not video_link:
+                return {"error": "No video link found."}
+            
+            all_links = []
+            for quality in preferred_qualities:
+                quality_buttons = page.query_selector_all(f"{quality} li a")
+                for button in quality_buttons:
+                    text = button.text_content().strip().lower()
+                    if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
+                        all_links.append(button.evaluate("node => node.href"))
+            
+            return {"video_link": all_links}
 
     except Exception as e:
         return {"error": str(e)}
