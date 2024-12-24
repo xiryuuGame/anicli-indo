@@ -12,9 +12,9 @@ Aplikasi ini menggunakan scraper unofficial. Kami meminta maaf kepada ani-cli da
 ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝   ╚═════╝╚══════╝╚═╝╚═╝
 ```
 
-## Video Demonstrasi
+## Demonstrasi
 
-[anicliV.webm](vid/anicliV.webm)
+![anicli-demo.gif](vid/anicli-demo.gif)
 
 ## Fitur
 
