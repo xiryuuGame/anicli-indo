@@ -1,0 +1,4 @@
+rich
+inquirer
+playwright
+beautifulsoup4

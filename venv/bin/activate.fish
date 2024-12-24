@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/xiryuu/Desktop/code/project/anicliI/venv
+set -gx VIRTUAL_ENV /home/xiryuu/Desktop/code/project/test/anicliI/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

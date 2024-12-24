@@ -82,53 +82,61 @@ def scrape_video_link(url, user_agent):
                 () => document.querySelectorAll('.m480p li a, .m720p li a').length > 0
             """, timeout=5000)
 
-            video_links = {"720p": [], "480p": []}
-
-            # Function to extract video link from iframe
-            def extract_video_link(frame):
-                frame.wait_for_selector("video", timeout=10000)
-                video_element = frame.query_selector("video")
-                if video_element:
-                    return video_element.get_attribute("src")
-                return None
-
-            # Select preferred quality links
-            quality_buttons_720p = page.query_selector_all(".m720p li a")
-            for button in quality_buttons_720p:
-                text = button.text_content().strip().lower()
-                if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
-                    with page.expect_popup() as popup_info:
-                        button.click()
-                    popup_info.value.close()
-                    time.sleep(5)
-                    iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
-                    if iframe:
-                        frame = iframe.content_frame()
-                        if frame:
-                            video_link = extract_video_link(frame)
-                            if video_link:
-                                video_links["720p"].append(video_link)
-
-            quality_buttons_480p = page.query_selector_all(".m480p li a")
-            for button in quality_buttons_480p:
-                text = button.text_content().strip().lower()
-                if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu","otakuwatchhd2", "otakuwatchhd","moedesuhd","moedesu", "desudrive"]:
-                    with page.expect_popup() as popup_info:
-                        button.click()
-                    popup_info.value.close()
-                    time.sleep(5)
-                    iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
-                    if iframe:
-                        frame = iframe.content_frame()
-                        if frame:
-                            video_link = extract_video_link(frame)
-                            if video_link:
-                                video_links["480p"].append(video_link)
+            # Select preferred quality link
+            quality_buttons = page.query_selector_all(".m720p li a")
+            preferred_link = None
             
-            browser.close()
+            videoLink = {"720": [], "480": []}  # Inisialisasi dictionary untuk menyimpan link video
+
+            # Scrape untuk resolusi 720p
+            quality_buttons_720 = page.query_selector_all(".m720p li a")
+            for button in quality_buttons_720:
+                text = button.text_content().strip().lower()
+                if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu", "otakuwatchhd2", "otakuwatch2", "moedesuhd", "moedesu", "odesu", "odesu2", "desudrive"]:
+                    button.click()
+                    time.sleep(1.5)  # Tunggu proses load
+
+                    iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
+                    if iframe:
+                        frame = iframe.content_frame()
+                        if frame:
+                            frame.wait_for_selector("video", timeout=10000)
+                            video_element = frame.query_selector("video")
+                            if video_element:
+                                video_link = video_element.get_attribute("src")
+                                if video_link:
+                                    videoLink["720"].append(video_link)  # Tambahkan link video 720p
+                                    page.click(".m480p")  # Trigger the click
+
+            # Scrape untuk resolusi 480p
+            quality_buttons_480 = page.query_selector_all(".m480p li a")
+            for button in quality_buttons_480:
+                text = button.text_content().strip().lower()
+                if text in ["desudesu", "desudesu2", "otakustream", "otakuplay", "ondesuhd", "ondesu3", "updesu", "playdesu", "otakuwatchhd2", "otakuwatch2", "moedesuhd", "moedesu", "odesu", "odesu2", "desudrive"]:
+                    button.click()
+                    time.sleep(1.5)  # Tunggu proses load
+
+                    iframe = page.wait_for_selector("#pembed > div > iframe", timeout=10000)
+                    if iframe:
+                        frame = iframe.content_frame()
+                        if frame:
+                            frame.wait_for_selector("video", timeout=10000)
+                            video_element = frame.query_selector("video")
+                            if video_element:
+                                video_link = video_element.get_attribute("src")
+                                if video_link:
+                                    videoLink["480"].append(video_link)  # Tambahkan link video 480p
+                                    page.click(".m480p")  # Trigger the click
+
+            # Periksa hasil
+            if not videoLink["720"] and not videoLink["480"]:
+                return {"error": "Tidak ada video link yang ditemukan."}
+
+            # Simpan ke file JSON
             with open("link.json", "w") as f:
-                json.dump(video_links, f, indent=4)
-            return {"video_links": video_links}
+                f.write(json.dumps(videoLink, indent=4))
+
+            return videoLink
 
     except Exception as e:
         return {"error": str(e)}
