@@ -4,10 +4,10 @@ Sebuah fork dari ani-cli yang asli, yang telah diubah ke dalam bentuk Python dan
 Aplikasi ini menggunakan scraper unofficial. Kami meminta maaf kepada ani-cli dan Otaku Desu karena tidak meminta izin untuk menggunakan referensi dan scrapingnya.
 
 ```ascii
-█████╗ ███╗   ██╗██╗   ██████╗██╗   ██╗██╗
-██╔══██╗████╗  ██║██║  ██╔════╝██║   ██║██║
-███████║██╔██╗ ██║██║  ██║     ██║   ██║██║
-██╔══██║██║╚██╗██║██║  ██║     ██║   ██║██║
+ █████╗ ███╗   ██╗██╗   ██████╗██╗     ██╗██╗
+██╔══██╗████╗  ██║██║  ██╔════╝██║     ██║██║
+███████║██╔██╗ ██║██║  ██║     ██║     ██║██║
+██╔══██║██║╚██╗██║██║  ██║     ██║     ██║██║
 ██║  ██║██║ ╚████║██║  ╚██████╗███████╗██║██║
 ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝   ╚═════╝╚══════╝╚═╝╚═╝
 ```
