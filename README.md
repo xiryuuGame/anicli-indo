@@ -14,7 +14,7 @@ Aplikasi ini menggunakan scraper unofficial. Kami meminta maaf kepada ani-cli da
 
 ## Demonstrasi
 
-![anicli-demo.gif](vid/anicli-demo.gif)
+![anicli-demo.gif](https://github.com/xiryuuGame/anicli-indo/blob/main/vid/anicliV.gif)
 
 ## Fitur
 
