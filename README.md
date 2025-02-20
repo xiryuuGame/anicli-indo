@@ -1,4 +1,4 @@
-# AniCLI-indo
+# AniCLI-indo (DEPRECATED)
 
 Sebuah fork dari ani-cli yang asli, yang telah diubah ke dalam bentuk Python dan disesuaikan untuk subtitle Indonesia dari website otakudesu.cloud. 
 Aplikasi ini menggunakan scraper unofficial. Kami meminta maaf kepada ani-cli dan Otaku Desu karena tidak meminta izin untuk menggunakan referensi dan scrapingnya.
